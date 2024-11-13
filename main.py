@@ -55,15 +55,20 @@ def generate_enhanced_prompt(basic_prompt):
         return f"Error: {str(e)}"
 
 # Function to download the image
-def download_image(image_url, save_path='image.jpg'):
-    try:
-        response = requests.get(image_url)
-        response.raise_for_status()  # Raise an exception for bad status codes
-        with open(save_path, 'wb') as file:
-            file.write(response.content)
-        return save_path
-    except requests.exceptions.RequestException as e:
-        return f"Error: {str(e)}"
+def download_image(image_url, save_path='image.jpg', retries=3, delay=2):
+    attempt = 0
+    while attempt < retries:
+        try:
+            response = requests.get(image_url)
+            response.raise_for_status()  # Raise an exception for bad status codes
+            with open(save_path, 'wb') as file:
+                file.write(response.content)
+            return save_path
+        except requests.exceptions.RequestException:
+            attempt += 1
+            if attempt >= retries:
+                return "Error: Failed to download image after multiple attempts"
+            time.sleep(delay)  # Wait before retrying
 
 # Main function for Streamlit app
 def main():
