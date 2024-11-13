@@ -16,7 +16,7 @@ genai.configure(api_key=api_key)
 # Define the system instruction for Google Gemini for enhanced prompts
 instruction = """
 ou are an AI expert helping with generating unique image prompts. Your task is to provide detailed, creative, and high-quality prompts based on user input. You should take the user's basic image description and enrich it with elements that will generate visually stunning and relevant images. Focus on making the prompt rich, descriptive, and suitable for high-resolution images.
-dont give multiple prompt"""
+dont give multiple prompt and Enhance this description by focusing on high-quality details such as lighting, texture, composition, and color schemes. Ensure the image is visually stunning, with depth and clarity, suitable for high-resolution output"""
 
 # Function to generate enhanced image prompts using Google Gemini API
 def generate_enhanced_prompt(basic_prompt):
