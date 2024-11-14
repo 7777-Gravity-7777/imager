@@ -4,7 +4,6 @@ import urllib.parse
 import google.generativeai as genai
 import os
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
-import time
 #test
 # Set up the page configuration for title and favicon
 st.set_page_config(page_title="Imager", page_icon="✨", layout="wide")
@@ -109,7 +108,7 @@ def main():
     if st.button("Generate Image"):
         with st.spinner("Generating your image..."):
             encoded_prompt = urllib.parse.quote(enhanced_prompt)
-            image_url = f"https://pollinations.ai/p/{encoded_prompt}?width={width}&height={height}&seed={seed}&model={model}&nologo=true&enhance=true"
+            image_url = f"https://pollinations.ai/p/{encoded_prompt}?width={width}&height={height}&seed={seed}&model={model}"
             image_path = download_image(image_url)
 
             if "Error" in image_path:
