@@ -4,6 +4,7 @@ import urllib.parse
 import google.generativeai as genai
 import os
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
+import time
 #test
 # Set up the page configuration for title and favicon
 st.set_page_config(page_title="Imager", page_icon="✨", layout="wide")
