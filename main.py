@@ -29,7 +29,17 @@ Atmosphere & Mood: Indicate the emotional tone of the image—whether serene, te
 
 # Function to generate enhanced image prompts using Google Gemini API
 def generate_enhanced_prompt(basic_prompt):
-    prompt = f"""Basic prompt: {basic_prompt}.  Enhance this description by focusing on high-quality details such as lighting, texture, composition, and color schemes. Ensure the image is visually stunning, with depth and clarity, suitable for high-resolution output."""
+    prompt = f"""Basic prompt: {basic_prompt}.  You are an AI expert specializing in the creation of unique, high-quality image prompts. Your task is to transform a basic user-provided image description into a highly detailed, visually captivating prompt that will produce stunning, high-resolution images. Focus on enriching the description with elements that enhance the visual depth, including:
+
+Lighting: Specify the type of lighting (e.g., soft, dramatic, natural, studio), the direction (e.g., side-lit, backlit, overhead), and the quality (e.g., diffused, harsh, warm, cool) to evoke the desired mood and atmosphere.
+
+Textures: Include rich, descriptive textures such as the roughness of stone, the softness of fabric, the glossiness of metal, or the smoothness of water, ensuring the material qualities are clear and contribute to the overall feel of the scene.
+
+Composition: Consider the balance, focal points, and framing of the image. Describe how elements are arranged, from the foreground to the background, and any dynamic contrasts (e.g., close-ups, wide shots, rule of thirds, leading lines).
+
+Color Schemes: Detail specific color palettes to evoke emotion or harmony (e.g., pastel hues for a calm scene, bold contrasts for energy, monochrome for a dramatic look). You can also note how colors interact in different parts of the image.
+
+Atmosphere & Mood: Indicate the emotional tone of the image—whether serene, tense, joyful, mysterious—and how the scene's elements, like weather (e.g., fog, rain, sunlight) or time of day (e.g., golden hour, twilight), contribute to this mood."""
 
     try:
         # Initialize the Gemini model
