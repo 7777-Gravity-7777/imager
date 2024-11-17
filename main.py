@@ -119,7 +119,7 @@ def main():
     if st.button("Generate Image"):
         with st.spinner("Generating your image..."):
             encoded_prompt = urllib.parse.quote(enhanced_prompt)
-            image_url = f"https://pollinations.ai/p/{encoded_prompt}?width={width}&height={height}&seed={seed}&model={model}"
+            image_url = f"https://pollinations.ai/p/{encoded_prompt}?width={width}&height={height}&seed={seed}&model={model}&nologo=True"
             image_path = download_image(image_url)
 
             if "Error" in image_path:
