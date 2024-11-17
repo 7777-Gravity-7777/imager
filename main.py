@@ -6,7 +6,7 @@ import os
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import time
 from gradio_client import Client, handle_file
-
+#test
 # Set up the page configuration for title and favicon
 st.set_page_config(page_title="Imager", page_icon="✨", layout="wide")
 
@@ -43,30 +43,6 @@ def remove_watermark(image_path):
         return result
     except Exception as e:
         return f"Error in watermark removal: {str(e)}"
-
-def enhance_image(image_url, upscale_factor=2, seed=42, prompta=""):
-    """Enhances the image using Finegrain Image Enhancer."""
-    client = Client("finegrain/finegrain-image-enhancer")
-    try:
-        result = client.predict(
-            input_image=handle_file(image_url),
-            prompt=prompt,
-            negative_prompt="Hello!!",
-            seed=seed,
-            upscale_factor=upscale_factor,
-            controlnet_scale=0.6,
-            controlnet_decay=1,
-            condition_scale=6,
-            tile_width=112,
-            tile_height=144,
-            denoise_strength=0.35,
-            num_inference_steps=18,
-            solver="DDIM",
-            api_name="/process"
-        )
-        return result
-    except Exception as e:
-        return f"Error in image enhancement: {str(e)}"
     
 def generate_enhanced_prompt(basic_prompt):
     prompt = f"""Basic prompt: {basic_prompt}.  You are an AI expert specializing in the creation of unique, high-quality image prompts. Your task is to transform a basic user-provided image description into a highly detailed, visually captivating prompt that will produce stunning, high-resolution images. Focus on enriching the description with elements that enhance the visual depth, including:
@@ -84,12 +60,15 @@ Atmosphere & Mood: Indicate the emotional tone of the image—whether serene, te
     try:
         # Initialize the Gemini model
         model = genai.GenerativeModel("gemini-1.5-flash-latest", system_instruction=instruction, 
-                                 safety_settings={ 
-                                     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE, 
-                                     HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,  
-                                     HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE, 
-                                     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE, 
-                                 })
+                                
+                                      safety_settings={
+                                          HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE, 
+                                          HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,  
+                                          HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE, 
+                                          HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE, 
+                                          
+        }
+    )
         # Start a chat with the model
         chat = model.start_chat(history=[])
         response = chat.send_message(prompt)
@@ -157,22 +136,17 @@ def main():
             encoded_prompt = urllib.parse.quote(enhanced_prompt)
             image_url = f"https://pollinations.ai/p/{encoded_prompt}?width={width}&height={height}&seed={seed}&model={model}"
             image_path = download_image(image_url)
-            
+
             if "Error" in image_path:
                 st.error(f"Failed to generate image: {image_path}")
             else:
-                # Remove watermark and ensure the path is valid
                 watermark_removed_path = remove_watermark(image_path)
                 if isinstance(watermark_removed_path, str) and "Error" in watermark_removed_path:
                     st.error(watermark_removed_path)
                 else:
-                    # If watermark removal was successful, continue to enhance the image
-                    upscaled_image = enhance_image(watermark_removed_path, seed=seed)
-                    if "Error" in upscaled_image:
-                        st.error(f"Error during image enhancement: {upscaled_image}")
-                    else:
-                        st.image(upscaled_image, use_container_width=True)
-                        st.success("Image generated successfully!")
+                    st.image(watermark_removed_path, use_container_width=True)
+                    st.success("Image generated successfully!")
 
+# Run the app
 if __name__ == "__main__":
     main()
