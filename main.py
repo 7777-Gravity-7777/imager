@@ -167,16 +167,7 @@ def main():
                     st.error(watermark_removed_path)
                 else:
                     # If watermark removal was successful, continue to enhance the image
-                    upscaled_image = enhance_image(watermark_removed_path, prompt="""Upscale the image to ultra-high resolution while maintaining the integrity of the original composition and preserving sharpness in all 
-            key elements. 
-            Focus on enhancing fine details, such as textures, edges, and small features that might lose clarity during the enlargement process. 
-            Sharpen and define intricate details, especially in areas like skin, fabric, or metal, ensuring they are crisp and clear. Improve the overall 
-            vibrancy of the colors, making sure they remain natural but enhanced, with rich, warm tones and smooth gradients. Reduce any noise or 
-            pixelation that might appear as a result of upscaling, ensuring the image stays clean and free of artifacts. Enhance textures such as fabric, 
-            stone, and water, ensuring their qualities (smoothness, roughness, glossiness) are clearly visible and realistic. Maintain the original mood and 
-            style of the image, applying any artistic effects subtly without altering the fundamental appearance. Finally, ensure the image is optimized for 
-            display on large screens or high-quality prints, with all details clear and lifelike, 
-            ensuring no blurring or loss of quality.""", seed=seed)
+                    upscaled_image = enhance_image(watermark_removed_path, seed=seed)
                     if "Error" in upscaled_image:
                         st.error(f"Error during image enhancement: {upscaled_image}")
                     else:
