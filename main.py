@@ -6,7 +6,7 @@ import os
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import time
 from gradio_client import Client, handle_file
-#test
+
 # Set up the page configuration for title and favicon
 st.set_page_config(page_title="Imager", page_icon="✨", layout="wide")
 
@@ -44,7 +44,7 @@ def remove_watermark(image_path):
     except Exception as e:
         return f"Error in watermark removal: {str(e)}"
 
-def enhance_image(image_url, upscale_factor=2, seed=42,prompta):
+def enhance_image(image_url, upscale_factor=2, seed=42, prompta=""):
     """Enhances the image using Finegrain Image Enhancer."""
     client = Client("finegrain/finegrain-image-enhancer")
     try:
@@ -93,15 +93,12 @@ Atmosphere & Mood: Indicate the emotional tone of the image—whether serene, te
     try:
         # Initialize the Gemini model
         model = genai.GenerativeModel("gemini-1.5-flash-latest", system_instruction=instruction, 
-                                
-                                      safety_settings={
-                                          HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE, 
-                                          HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,  
-                                          HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE, 
-                                          HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE, 
-                                          
-        }
-    )
+                                 safety_settings={
+                                     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE, 
+                                     HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,  
+                                     HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE, 
+                                     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE, 
+                                 })
         # Start a chat with the model
         chat = model.start_chat(history=[])
         response = chat.send_message(prompt)
@@ -174,20 +171,15 @@ def main():
                 st.error(f"Failed to generate image: {image_path}")
             else:
                 watermark_removed_path = remove_watermark(image_path)
-                if isinstance(watermark_removed_path, str) and "Error" in watermark_removed_path:
+                if "Error" in watermark_removed_path:
                     st.error(watermark_removed_path)
                 else:
-                    watermark_removed_image = remove_watermark(image_path)
-                    if "Error" in watermark_removed_image:
-                        st.error(f"Error during image generation: {watermark_removed_image}")
+                    upscaled_image = enhance_image(watermark_removed_path, prompta=enhanced_prompt, seed=seed)
+                    if "Error" in upscaled_image:
+                        st.error(f"Error during image generation: {upscaled_image}")
                     else:
-                         upscaled_image = upscale_image(watermark_removed_image, prompta, seed, upscale_factor)
-                        if "Error" in upscaled_image:
-                            st.error(f"Error during image generation: {upscaled_image}")
-                        else:
-                            st.image(upscaled_image, use_container_width=True)
-                            st.success("Image generated successfully!")
-                        
+                        st.image(upscaled_image, use_container_width=True)
+                        st.success("Image generated successfully!")
 
 # Run the app
 if __name__ == "__main__":
