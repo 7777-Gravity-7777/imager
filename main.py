@@ -50,7 +50,7 @@ def enhance_image(image_url, upscale_factor=2, seed=42, prompta=""):
     try:
         result = client.predict(
             input_image=handle_file(image_url),
-            prompta="""Upscale the image to ultra-high resolution while maintaining the integrity of the original composition and preserving sharpness in all 
+            prompt="""Upscale the image to ultra-high resolution while maintaining the integrity of the original composition and preserving sharpness in all 
             key elements. 
             Focus on enhancing fine details, such as textures, edges, and small features that might lose clarity during the enlargement process. 
             Sharpen and define intricate details, especially in areas like skin, fabric, or metal, ensuring they are crisp and clear. Improve the overall 
@@ -174,7 +174,7 @@ def main():
                 if "Error" in watermark_removed_path:
                     st.error(watermark_removed_path)
                 else:
-                    upscaled_image = enhance_image(watermark_removed_path, prompta=enhanced_prompt, seed=seed)
+                    upscaled_image = enhance_image(watermark_removed_path, prompt=enhanced_prompt, seed=seed)
                     if "Error" in upscaled_image:
                         st.error(f"Error during image generation: {upscaled_image}")
                     else:
