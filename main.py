@@ -5,8 +5,8 @@ import google.generativeai as genai
 import os
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import time
-from remwm import WatermarkRemover  # Import the watermark remover
-
+from gradio_client import Client, handle_file
+#test
 # Set up the page configuration for title and favicon
 st.set_page_config(page_title="Imager", page_icon="✨", layout="wide")
 
@@ -28,8 +28,22 @@ Composition: Consider the balance, focal points, and framing of the image. Descr
 Color Schemes: Detail specific color palettes to evoke emotion or harmony (e.g., pastel hues for a calm scene, bold contrasts for energy, monochrome for a dramatic look). You can also note how colors interact in different parts of the image.
 
 Atmosphere & Mood: Indicate the emotional tone of the image—whether serene, tense, joyful, mysterious—and how the scene's elements, like weather (e.g., fog, rain, sunlight) or time of day (e.g., golden hour, twilight), contribute to this mood."""
-  
+
 # Function to generate enhanced image prompts using Google Gemini API
+gradio_client = Client("DamarJati/Remove-watermark")
+
+def remove_watermark(image_path):
+    """Uses the Gradio client to remove watermarks from the image."""
+    try:
+        result = gradio_client.predict(
+            image=handle_file(image_path),
+            model_choice="microsoft/Florence-2-large",
+            api_name="/predict"
+        )
+        return result
+    except Exception as e:
+        return f"Error in watermark removal: {str(e)}"
+    
 def generate_enhanced_prompt(basic_prompt):
     prompt = f"""Basic prompt: {basic_prompt}.  You are an AI expert specializing in the creation of unique, high-quality image prompts. Your task is to transform a basic user-provided image description into a highly detailed, visually captivating prompt that will produce stunning, high-resolution images. Focus on enriching the description with elements that enhance the visual depth, including:
 
@@ -46,13 +60,15 @@ Atmosphere & Mood: Indicate the emotional tone of the image—whether serene, te
     try:
         # Initialize the Gemini model
         model = genai.GenerativeModel("gemini-1.5-flash-latest", system_instruction=instruction, 
-                                 safety_settings={
-                                      HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE, 
-                                      HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,  
-                                      HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE, 
-                                      HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-                                 }
-        )
+                                
+                                      safety_settings={
+                                          HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE, 
+                                          HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,  
+                                          HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE, 
+                                          HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE, 
+                                          
+        }
+    )
         # Start a chat with the model
         chat = model.start_chat(history=[])
         response = chat.send_message(prompt)
@@ -80,18 +96,6 @@ def download_image(image_url, save_path='image.jpg', retries=3, delay=2):
                 return "Error: Failed to download image after multiple attempts"
             time.sleep(delay)  # Wait before retrying
 
-# Watermark Removal Function
-def remove_watermark(image_path, output_path):
-    try:
-        # Initialize the WatermarkRemover
-        remover = WatermarkRemover()
-
-        # Process the image to remove watermark
-        remover.process_images_florence_lama(image_path, output_path)
-        return output_path
-    except Exception as e:
-        return f"Error in watermark removal: {str(e)}"
-
 # Main function for Streamlit app
 def main():
     st.title("Imager ✨")
@@ -112,30 +116,11 @@ def main():
 
     seed = st.slider("Seed", 1, 1000, 42)
 
+    # Model selection
     model = st.selectbox("Select a model", [
         "Flux", "Flux-Pro", "Flux-Realism", "Flux-Anime", "Flux-3D", "Flux-CablyAl", "Turbo"
     ])
 
-    # Upload image to remove watermark
-    uploaded_image = st.file_uploader("Upload an image with a watermark", type=["jpg", "jpeg", "png"])
-
-    if uploaded_image:
-        # Save the uploaded image locally
-        image_path = os.path.join("temp", "uploaded_image.jpg")
-        with open(image_path, "wb") as f:
-            f.write(uploaded_image.getbuffer())
-        
-        # Set up output path for watermark removal
-        output_path = os.path.join("temp", "image_without_watermark.jpg")
-
-        # Remove watermark
-        processed_image_path = remove_watermark(image_path, output_path)
-
-        if "Error" in processed_image_path:
-            st.error(f"Failed to remove watermark: {processed_image_path}")
-        else:
-            st.image(processed_image_path, caption="Processed Image without Watermark", use_column_width=True)
-    
     # Generate enhanced prompt if AI is enabled
     if enable_ai and prompt:
         enhanced_prompt = generate_enhanced_prompt(prompt)
@@ -155,8 +140,12 @@ def main():
             if "Error" in image_path:
                 st.error(f"Failed to generate image: {image_path}")
             else:
-                st.image(image_path, use_container_width=True)
-                st.success("Image generated successfully!")
+                watermark_removed_path = remove_watermark(image_path)
+                if isinstance(watermark_removed_path, str) and "Error" in watermark_removed_path:
+                    st.error(watermark_removed_path)
+                else:
+                    st.image(watermark_removed_path, use_container_width=True)
+                    st.success("Image generated successfully!")
 
 # Run the app
 if __name__ == "__main__":
