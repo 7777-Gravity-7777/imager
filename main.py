@@ -43,6 +43,39 @@ def remove_watermark(image_path):
         return result
     except Exception as e:
         return f"Error in watermark removal: {str(e)}"
+
+def enhance_image(image_url, upscale_factor=2, seed=42,prompta):
+    """Enhances the image using Finegrain Image Enhancer."""
+    client = Client("finegrain/finegrain-image-enhancer")
+    try:
+        result = client.predict(
+            input_image=handle_file(image_url),
+            prompta="""Upscale the image to ultra-high resolution while maintaining the integrity of the original composition and preserving sharpness in all 
+            key elements. 
+            Focus on enhancing fine details, such as textures, edges, and small features that might lose clarity during the enlargement process. 
+            Sharpen and define intricate details, especially in areas like skin, fabric, or metal, ensuring they are crisp and clear. Improve the overall 
+            vibrancy of the colors, making sure they remain natural but enhanced, with rich, warm tones and smooth gradients. Reduce any noise or 
+            pixelation that might appear as a result of upscaling, ensuring the image stays clean and free of artifacts. Enhance textures such as fabric, 
+            stone, and water, ensuring their qualities (smoothness, roughness, glossiness) are clearly visible and realistic. Maintain the original mood and 
+            style of the image, applying any artistic effects subtly without altering the fundamental appearance. Finally, ensure the image is optimized for 
+            display on large screens or high-quality prints, with all details clear and lifelike, 
+            ensuring no blurring or loss of quality.""",
+            negative_prompt="Hello!!",
+            seed=seed,
+            upscale_factor=upscale_factor,
+            controlnet_scale=0.6,
+            controlnet_decay=1,
+            condition_scale=6,
+            tile_width=112,
+            tile_height=144,
+            denoise_strength=0.35,
+            num_inference_steps=18,
+            solver="DDIM",
+            api_name="/process"
+        )
+        return result
+    except Exception as e:
+        return f"Error in image enhancement: {str(e)}"
     
 def generate_enhanced_prompt(basic_prompt):
     prompt = f"""Basic prompt: {basic_prompt}.  You are an AI expert specializing in the creation of unique, high-quality image prompts. Your task is to transform a basic user-provided image description into a highly detailed, visually captivating prompt that will produce stunning, high-resolution images. Focus on enriching the description with elements that enhance the visual depth, including:
@@ -144,8 +177,17 @@ def main():
                 if isinstance(watermark_removed_path, str) and "Error" in watermark_removed_path:
                     st.error(watermark_removed_path)
                 else:
-                    st.image(watermark_removed_path, use_container_width=True)
-                    st.success("Image generated successfully!")
+                    watermark_removed_image = remove_watermark(image_path)
+                    if "Error" in watermark_removed_image:
+                        st.error(f"Error during image generation: {watermark_removed_image}")
+                    else:
+                         upscaled_image = upscale_image(watermark_removed_image, prompta, seed, upscale_factor)
+                        if "Error" in upscaled_image:
+                            st.error(f"Error during image generation: {upscaled_image}")
+                        else:
+                            st.image(upscaled_image, use_container_width=True)
+                            st.success("Image generated successfully!")
+                        
 
 # Run the app
 if __name__ == "__main__":
