@@ -161,6 +161,9 @@ def main():
         enhanced_prompt = prompt if prompt else "A beautiful 3D scene of a futuristic city"  # Use default if no prompt
 
     # Image generation button with a loading spinner
+    def main():
+    # Assuming previous code for setting up Streamlit interface and getting input from user
+    
     if st.button("Generate Image"):
         with st.spinner("Generating your image..."):
             encoded_prompt = urllib.parse.quote(enhanced_prompt)
@@ -171,12 +174,13 @@ def main():
                 st.error(f"Failed to generate image: {image_path}")
             else:
                 watermark_removed_path = remove_watermark(image_path)
-                if "Error" in watermark_removed_path:
+                if isinstance(watermark_removed_path, str) and "Error" in watermark_removed_path:
                     st.error(watermark_removed_path)
                 else:
+                    # Pass watermark_removed_path (image URL or local path) to enhance_image function with correct prompt
                     upscaled_image = enhance_image(watermark_removed_path, prompt=enhanced_prompt, seed=seed)
                     if "Error" in upscaled_image:
-                        st.error(f"Error during image generation: {upscaled_image}")
+                        st.error(f"Error during image enhancement: {upscaled_image}")
                     else:
                         st.image(upscaled_image, use_container_width=True)
                         st.success("Image generated successfully!")
